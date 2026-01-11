@@ -36,6 +36,7 @@ def create_app() -> Flask:
     from app.routes.export import export_bp
     from app.cli import engspec_cli
     from app.routes.anatel import anatel_bp
+    from app.routes.v4 import v4_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(projects_bp)
@@ -45,6 +46,7 @@ def create_app() -> Flask:
     app.register_blueprint(export_bp)
     app.register_blueprint(frontend_bp)
     app.register_blueprint(anatel_bp)
+    app.register_blueprint(v4_bp)
     app.cli.add_command(engspec_cli)
 
     init_celery(app)

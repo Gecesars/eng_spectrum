@@ -20,6 +20,7 @@ from app.models.gis import (
 )
 from app.models.grid import FieldTile
 from app.models.anatel import Aerodrome, AnatelStation, ViabilityStudy
+from app.models.v4 import Network, V4Station, V4Antenna, Raster, Job
 
 __all__ = [
     "User",
@@ -43,4 +44,9 @@ __all__ = [
     "AnatelStation",
     "Aerodrome",
     "ViabilityStudy",
+    "Network",
+    "V4Station",
+    "V4Antenna",
+    "Raster",
+    "Job",
 ]
