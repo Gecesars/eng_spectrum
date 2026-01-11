@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engenharia de Espectro</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-grid"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">ES</span>
+        <div>
+          <div class="brand-title">Engenharia de Espectro</div>
+          <div class="brand-sub">Simulação • Contorno • RNI • DECEA</div>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#como">Como funciona</a>
+        <a href="#recursos">Recursos</a>
+        <a href="#auth">Entrar</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="badge">SIRGAS 2000 + Mosaico-ready</div>
+          <h1>Planeje, simule e exporte com confiança regulatória.</h1>
+          <p>
+            Do contorno protegido ao relatório RNI e OPEA, com fluxos claros por projeto e revisões rastreáveis.
+          </p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#auth">Cadastrar / Entrar</a>
+            <button class="btn ghost" id="demoScroll">Ver painel</button>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <div class="panel-card">
+            <div class="panel-head">Resumo da revisão</div>
+            <div class="panel-metric">
+              <span>Contorno</span>
+              <strong>72 radiais • híbrido</strong>
+            </div>
+            <div class="panel-metric">
+              <span>D/U</span>
+              <strong>Margem +3.2 dB</strong>
+            </div>
+            <div class="panel-metric">
+              <span>RNI</span>
+              <strong>Raio público 64 m</strong>
+            </div>
+            <div class="panel-footer">Exportação KML/SHP + TXT Mosaico</div>
+          </div>
+          <div class="panel-card highlight">
+            <div class="panel-head">Mapa de cobertura</div>
+            <div class="mini-map">
+              <span class="ring"></span>
+              <span class="ring"></span>
+              <span class="ring"></span>
+            </div>
+            <div class="panel-footer">Grid + contorno fechado</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="como" class="grid-section">
+        <h2>Como funciona</h2>
+        <div class="grid-cards">
+          <article>
+            <h3>1. Dados</h3>
+            <p>Configure estação, antena, perdas e parâmetros de simulação.</p>
+          </article>
+          <article>
+            <h3>2. Simulação</h3>
+            <p>Contorno híbrido, D/U e conformidade RNI em um clique.</p>
+          </article>
+          <article>
+            <h3>3. Mapas</h3>
+            <p>Viewer com camadas para contorno, zonas RNI e OPEA.</p>
+          </article>
+          <article>
+            <h3>4. Exportação</h3>
+            <p>KML/SHP, TXT Mosaico e relatórios prontos para submissão.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="recursos" class="feature-section">
+        <div class="feature-copy">
+          <h2>Recursos essenciais</h2>
+          <ul>
+            <li>72 radiais com regra de monotonicidade conservadora</li>
+            <li>Interferência D/U co-canal e adjacentes</li>
+            <li>RNI conforme Ato 17.865/2023</li>
+            <li>OPEA e princípio da sombra</li>
+          </ul>
+        </div>
+        <div class="feature-box">
+          <div class="feature-pill">PostGIS + PostGrid</div>
+          <div class="feature-pill">Celery + Redis</div>
+          <div class="feature-pill">Exports compatíveis com Mosaico</div>
+        </div>
+      </section>
+
+      <section id="auth" class="auth-section">
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <button class="tab active" data-tab="login">Login</button>
+            <button class="tab" data-tab="register">Cadastro</button>
+          </div>
+          <div class="tab-content active" id="login">
+            <label>E-mail</label>
+            <input type="email" id="loginEmail" placeholder="voce@empresa.com" />
+            <label>Senha</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" />
+            <button class="btn primary" id="loginBtn">Entrar</button>
+          </div>
+          <div class="tab-content" id="register">
+            <label>E-mail</label>
+            <input type="email" id="registerEmail" placeholder="voce@empresa.com" />
+            <button class="btn primary" id="registerBtn">Criar conta</button>
+            <p class="hint">Você receberá um token de confirmação para definir a senha.</p>
+          </div>
+          <div class="auth-status" id="authStatus"></div>
+        </div>
+      </section>
+
+      <section class="dashboard" id="dashboard">
+        <div class="dashboard-header">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Projetos, revisões e execuções em um só lugar.</p>
+          </div>
+          <button class="btn ghost" id="refreshProjects">Atualizar</button>
+        </div>
+        <div class="dashboard-grid">
+          <div class="panel">
+            <h3>Novo projeto</h3>
+            <label>Nome</label>
+            <input type="text" id="projectName" placeholder="Projeto Ribeirão" />
+            <label>Serviço</label>
+            <select id="serviceType">
+              <option value="FM">FM</option>
+              <option value="eFM">eFM</option>
+              <option value="TVD">TV Digital</option>
+              <option value="RTR">RTR</option>
+              <option value="RADCOM">RADCOM</option>
+            </select>
+            <button class="btn primary" id="createProject">Criar</button>
+          </div>
+          <div class="panel">
+            <h3>Projetos</h3>
+            <div class="project-list" id="projectList">
+              <p class="muted">Faça login para ver seus projetos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <strong>Engenharia de Espectro</strong>
+        <p>Plataforma de simulação espectral para conformidade regulatória.</p>
+      </div>
+      <div class="footer-links">
+        <span>Termos</span>
+        <span>Privacidade</span>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

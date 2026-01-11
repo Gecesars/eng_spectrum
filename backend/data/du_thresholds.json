@@ -1,0 +1,24 @@
+{
+  "TV_Digital": {
+    "Digital/Digital": {
+      "co": 19,
+      "adj_lower": -31,
+      "adj_upper": -31
+    },
+    "Digital/Analog": {
+      "co": 34,
+      "adj_lower": -31,
+      "adj_upper": -31
+    },
+    "Analog/Digital": {
+      "co": 7,
+      "adj_lower": -6,
+      "adj_upper": -12
+    },
+    "Analog/Analog": {
+      "co": 45,
+      "adj_lower": -6,
+      "adj_upper": -12
+    }
+  }
+}

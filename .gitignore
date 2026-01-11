@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+exports/
+storage/
+node_modules/
+anatel/BR_setores_CD2022.dbf
+anatel/BR_setores_CD2022.shp
