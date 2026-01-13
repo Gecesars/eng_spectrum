@@ -13,9 +13,9 @@ from app.extensions import db
 SRID = int(os.getenv("SRID", "4674"))
 
 
-class Contour(db.Model):
+class GISContour(db.Model):
     __tablename__ = "contours"
-    __table_args__ = {"schema": "gis"}
+    __table_args__ = {"schema": "gis", "extend_existing": True}
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     revision_id = db.Column(UUID(as_uuid=True), ForeignKey("core.project_revisions.id"), nullable=False)
@@ -40,7 +40,7 @@ class ContourPoint(db.Model):
     lon = db.Column(Float, nullable=False)
     order_idx = db.Column(Integer, nullable=False)
 
-    contour = db.relationship("Contour", backref="points")
+    contour = db.relationship("GISContour", backref="points")
 
 
 class InterferenceTestPoint(db.Model):

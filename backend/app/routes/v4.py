@@ -29,6 +29,7 @@ def create_network():
     user = User.query.first() # Placeholder
     
     if not user:
+        # Fallback if no user exists
         return jsonify({'error': 'No user available'}), 400
         
     network = Network(
@@ -50,12 +51,6 @@ def list_stations(network_id):
     features = []
     for s in stations:
         # Check geom
-        # We can use db.session.scalar(func.ST_AsGeoJSON(s.geom)) but simplest is if we manually construct it
-        # or rely on s.geom being returned as WKBElement or similar.
-        # Let's simple query manual conversion for now or assume s.geom has simple accessors if using GeoAlchemy2 correctly.
-        # s.geom is WKBElement.
-        
-        # Helper to get geom
         try:
             geom_json = db.session.scalar(func.ST_AsGeoJSON(s.geom))
             geom = json.loads(geom_json)
@@ -107,12 +102,11 @@ def create_station():
 def create_link_job():
     data = request.json
     tx_id = data.get('tx_id')
-    rx_id = data.get('rx_id') # If RX is a station
-    # rx_point = data.get('rx_point') # If arbitrary point? Not implemented yet.
+    rx_id = data.get('rx_id')
     
     # Create Job
     job = Job(
-        network_id=data.get('network_id'), # Optional
+        network_id=data.get('network_id'),
         type='link_profile',
         status='pending',
         params=data
@@ -133,5 +127,34 @@ def get_job(job_id):
         'status': job.status,
         'progress': job.progress,
         'result': job.result_ref,
-        'error': job.error
+        'error': job.error,
+        'created_at': job.created_at.isoformat() if job.created_at else None
     })
+
+# --- TILES (MVT) ---
+
+@v4_bp.route('/tiles/ibge/<int:z>/<int:x>/<int:y>.pbf', methods=['GET'])
+def get_ibge_mvt(z, x, y):
+    """
+    Serve Vector Tiles (MVT) from PostGIS.
+    """
+    from sqlalchemy import text
+    
+    query = text("""
+        WITH bounds AS (
+            SELECT ST_TileEnvelope(:z, :x, :y) AS geom
+        ),
+        mvtgeom AS (
+            SELECT ST_AsMVTGeom(ST_Transform(s.geom, 3857), bounds.geom) AS geom,
+                   s.service, s.canal
+            FROM core.stations_v4 s, bounds
+            WHERE ST_Intersects(ST_Transform(s.geom, 3857), bounds.geom)
+        )
+        SELECT ST_AsMVT(mvtgeom.*, 'stations', 4096, 'geom') FROM mvtgeom;
+    """)
+    
+    # We need to execute scalar
+    pbf = db.session.execute(query, {'z': z, 'x': x, 'y': y}).scalar()
+    
+    from flask import Response
+    return Response(pbf, mimetype='application/vnd.mapbox-vector-tile')

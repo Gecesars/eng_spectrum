@@ -87,3 +87,105 @@ def calculate_link_profile(self, job_id, tx_id, rx_id):
         job.error = str(e)
         db.session.commit()
         raise e
+
+@celery_app.task(bind=True)
+def calculate_coverage(self, job_id, tx_id, radius_km=50.0, step_km=1.0):
+    """
+    Calculates P.1546 coverage (omnidirectional).
+    Returns a list of points (lat, lon, dBuV/m).
+    """
+    job = Job.query.get(job_id)
+    if not job:
+        return {"error": "Job not found"}
+    
+    job.status = "running"
+    db.session.commit()
+
+    try:
+        tx = V4Station.query.get(tx_id)
+        if not tx:
+            raise ValueError("Station not found")
+
+        # Basic parameters
+        freq = tx.freq_mhz or 100.0
+        erp = (tx.erp_dbm or 60.0) / 10.0 # dBm -> dBW? No, Py1546 expects kW usually? 
+        # wrapper takes tx_erp_kw. 
+        # erp_dbm -> mW -> W -> kW
+        # 60 dBm = 1000 W = 1 kW.
+        # 10^(dbm/10) = mW. 
+        erp_mw = 10**( (tx.erp_dbm or 60.0) / 10.0 )
+        erp_kw = erp_mw / 1_000_000.0
+        
+        tx_h_agl = tx.htx or 30.0
+        # tx_ground = ... need DEM ...
+        # For MVP we assume flat earth or fetch from DEM if possible.
+        # We need a proper way to get DEM.
+        # For now, let's use a placeholder for terrain height fetching.
+        
+        # We'll compute 36 radials (every 10 deg)
+        points = []
+        
+        lat0 = tx.geom.y
+        lon0 = tx.geom.x
+        
+        # We need projected coordinates for distance/azimuth usually, but for low precision we use spherical.
+        # Py1546 needs heff. 
+        # heff = h_agl + h_ground - avg_terrain(3-15km).
+        # We'll assume heff = h_agl for now to avoid complexity of DEM fetching in this task file without raster access.
+        # TODO: Inject RasterService or similar.
+        
+        heff = tx_h_agl # Simplification
+        
+        from app.math.p1546 import calc_p1546_point
+         
+        for az in range(0, 360, 10):
+            # Compute points along radial
+            for dist in range(1, int(radius_km)+1, int(step_km or 1)):
+                 # Calculate lat/lon of point
+                 # Simple flat earth approximation for small distances
+                 # lat = lat0 + (dist/111) * cos(az)
+                 # lon = lon0 + (dist/(111*cos(lat))) * sin(az)
+                 
+                 rad = np.radians(az)
+                 d_deg = dist / 111.0 # Rough degrees
+                 
+                 p_lat = lat0 + d_deg * np.cos(rad)
+                 p_lon = lon0 + d_deg * np.sin(rad) / np.cos(np.radians(lat0))
+                 
+                 es, loss = calc_p1546_point(
+                     freq_mhz=freq,
+                     time_pct=50,
+                     tx_h_eff=heff,
+                     rx_h=10.0, # Standard mobile height
+                     distance_km=float(dist),
+                     env_type='Rural', # Default
+                     tx_erp_kw=erp_kw
+                 )
+                 
+                 points.append({
+                     "lat": p_lat,
+                     "lon": p_lon,
+                     "val": round(es, 1),
+                     "dist": dist,
+                     "az": az
+                 })
+                 
+        result = {
+            "points": points,
+            "center": {"lat": lat0, "lon": lon0},
+            "radius": radius_km
+        }
+        
+        job.result_ref = result # This might be large, but ok for MVP (few KB).
+        job.status = "done"
+        job.progress = 100
+        db.session.commit()
+        
+        return result
+
+    except Exception as e:
+        job.status = "error"
+        job.error = str(e)
+        db.session.commit()
+        raise e
+

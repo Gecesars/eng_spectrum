@@ -1,0 +1,32 @@
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+interface User {
+    id: string;
+    email: string;
+    name?: string;
+    expires_in_days?: number;
+}
+
+interface AuthState {
+    token: string | null;
+    user: User | null;
+    isAuthenticated: boolean;
+    setLogin: (token: string, user: User) => void;
+    logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+    persist(
+        (set) => ({
+            token: null,
+            user: null,
+            isAuthenticated: false,
+            setLogin: (token, user) => set({ token, user, isAuthenticated: true }),
+            logout: () => set({ token: null, user: null, isAuthenticated: false }),
+        }),
+        {
+            name: 'spectrum-auth',
+        }
+    )
+);

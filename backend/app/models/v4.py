@@ -122,3 +122,25 @@ class Job(db.Model):
     updated_at = db.Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     network = db.relationship("Network", backref="jobs")
+
+
+class Contour(db.Model):
+    """
+    Geospatial contours (isolinhas).
+    """
+    __tablename__ = "contours"
+    __table_args__ = {"schema": "core"}
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    network_id = db.Column(UUID(as_uuid=True), ForeignKey("core.networks.id"), nullable=False)
+    station_id = db.Column(UUID(as_uuid=True), ForeignKey("core.stations_v4.id"), nullable=True)
+    
+    field_strength_dbuvm = db.Column(Numeric, nullable=False)
+    model = db.Column(Text, nullable=True) # e.g. "ITU1546_50_50"
+    
+    geom = db.Column(Geometry("MULTIPOLYGON", srid=SRID, spatial_index=True), nullable=False)
+    
+    created_at = db.Column(DateTime(timezone=True), server_default=func.now())
+
+    network = db.relationship("Network", backref="contours")
+    station = db.relationship("V4Station", backref="contours")
