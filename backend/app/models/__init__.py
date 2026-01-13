@@ -12,7 +12,7 @@ from app.models.core import (
 )
 from app.models.docs import FileAsset
 from app.models.gis import (
-    Contour,
+    GISContour,
     ContourPoint,
     InterferenceTestPoint,
     RNICriticalArea,
@@ -20,7 +20,7 @@ from app.models.gis import (
 )
 from app.models.grid import FieldTile
 from app.models.anatel import Aerodrome, AnatelStation, ViabilityStudy
-from app.models.v4 import Network, V4Station, V4Antenna, Raster, Job
+from app.models.v4 import Network, V4Station, V4Antenna, Raster, Job, Contour
 
 __all__ = [
     "User",
@@ -34,6 +34,8 @@ __all__ = [
     "InterferenceCase",
     "RNIAssessment",
     "OPEAAssessment",
+    "OPEAAssessment",
+    "GISContour",
     "Contour",
     "ContourPoint",
     "InterferenceTestPoint",
